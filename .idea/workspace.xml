@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1ed6cf1b-c951-4995-81e0-48ab5f47701d" name="Changes" comment="init">
-      <change afterPath="$PROJECT_DIR$/dataset/Dataset.py" afterDir="false" />
+    <list default="true" id="1ed6cf1b-c951-4995-81e0-48ab5f47701d" name="Changes" comment="Инициализация в терминале">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/Dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/Dataset.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,21 +25,21 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "yuri2711"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;yuri2711&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/yuri2711/OtusProjectWork.git",
-    "accountId": "61488440-0e32-4a2c-9010-dfd3eb237086"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/yuri2711/OtusProjectWork.git&quot;,
+    &quot;accountId&quot;: &quot;61488440-0e32-4a2c-9010-dfd3eb237086&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="3B1XimK1w1BxGbTfwKBjK1thFxf" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -49,9 +49,10 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.Dataset.executor": "Run",
+    "Python.Dataset.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
@@ -105,7 +106,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1773657679837</updated>
-      <workItem from="1773657680900" duration="1371000" />
+      <workItem from="1773657680900" duration="11782000" />
+      <workItem from="1773815837987" duration="4244000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -115,7 +117,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773657799288</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Инициализация в терминале">
+      <option name="closed" value="true" />
+      <created>1773659096073</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1773659096073</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,7 +144,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init" />
-    <option name="LAST_COMMIT_MESSAGE" value="init" />
+    <MESSAGE value="Инициализация в терминале" />
+    <option name="LAST_COMMIT_MESSAGE" value="Инициализация в терминале" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -144,10 +155,21 @@
           <line>1</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dataset/Dataset.py</url>
+          <line>54</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="(past_close - df['low'][_y+1])/point" language="Python" />
+        <watch expression="(df['high'][_y+1] - past_close)/ point" language="Python" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/OtusProjectWork$Dataset.coverage" NAME="Dataset Coverage Results" MODIFIED="1773658941790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/dataset" />
+    <SUITE FILE_PATH="coverage/OtusProjectWork$Dataset.coverage" NAME="Dataset Coverage Results" MODIFIED="1773819735551" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/dataset" />
   </component>
 </project>
