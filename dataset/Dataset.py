@@ -1,14 +1,7 @@
 import torch
-import torch.nn as nn
-import torchvision
-import torchvision.transforms as transforms
 import pandas as pd
 import MetaTrader5 as mt5
-from bokeh.core.property.container import List
-from pandas import DataFrame
-import backtesting.backtesting as backtesting
 
-# Check Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 inits = False
 
@@ -53,6 +46,8 @@ def create_dataset(symbol: str) -> list:
         close_lst = list(df['close'][_i - past_bar: _i])
 
         tmp_data = open_lst+ high_lst+ low_lst+close_lst
+        tmp_data = [round(num, 5) for num in tmp_data]
+
         tmp_target_one = 0
         tmp_target_two = []
         past_close = df['close'][_i]
