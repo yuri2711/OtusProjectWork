@@ -68,4 +68,3 @@ def create_dataset(symbol: str) -> list:
 
     return lst_data
 
-
