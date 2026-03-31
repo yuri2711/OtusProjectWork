@@ -3,12 +3,12 @@ import pandas as pd
 import MetaTrader5 as mt5
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-inits = False
+init = False
 
 def __init__():
-    global inits
-    inits = mt5.initialize('C:/demoalfaforex/terminal64.exe')
-    if inits:
+    global init
+    init = mt5.initialize('C:/demoalfaforex/terminal64.exe')
+    if init:
         print('Initialization complete')
     else:
         print('Initialization failed')
@@ -17,17 +17,17 @@ def create_dataset(symbol: str) -> list:
     """
     Для вызова текущей функции будет проверка на инициализацию и подключение к терминалу.
     Далее идет выгрузка данных из терминала Metatrader5
-    Удаляются не нужные колонки.
+    Удаляются ненужные колонки.
 
     После чего происходит обработка данных. Берутся все данные за 30 свечей истории и предсказывается на 3 свечи вперед.
-    Проходится в цикле по всей истории и собираюся в список кортежей, где первое значение это данные из истории,
+    Проходится в цикле по всей истории и собираются в список кортежей, где первое значение это данные из истории,
     второе значение это таргет для первой модели и третье значение это список таргетов для третьей модели
 
     :param symbol:
     :return:
     """
-    global inits
-    if not inits:
+    global init
+    if not init:
         __init__()
 
     df = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 99000))
@@ -68,9 +68,3 @@ def create_dataset(symbol: str) -> list:
 
     return lst_data
 
-
-
-
-if __name__ == '__main__':
-    dataset = create_dataset("EURUSDrfd")
-    print(dataset)
