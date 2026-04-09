@@ -22,7 +22,7 @@ class TradingCNN(nn.Module):
         padding=(1, 0): Добавляет 1 единицу отступа по высоте (времени), чтобы сохранить длину временного ряда. По ширине отступ 0.
 
         :param n_features: Числовой параметр, описывающий количество признаков (open, high, low, close)...
-        :param n_classes: числовой параметр, описывающий количество классов в классификации (buy, sell)
+        :param n_classes: Числовой параметр, описывающий количество классов в классификации (buy, sell)
         """
         super(TradingCNN, self).__init__()
 
@@ -32,7 +32,7 @@ class TradingCNN(nn.Module):
         self.conv3 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=(3, 1), padding=(1, 0))
 
         # Полносвязные слои (для более сложного анализа)
-        self.fc1 = nn.Linear(768, 700)  # 10 — длина окна после pooling
+        self.fc1 = nn.Linear(768, 700)  # тут не понял как правильно считать количество нейронов. Сейчас стоит 768, но это я вставляю после ошибки запуска.
         self.fc2 = nn.Linear(700, 64)
 
         # Выходной слой
@@ -59,6 +59,15 @@ class TradingCNN(nn.Module):
         return out
 
 def train_model(model, train_loader, val_loader, target: Tensor, epochs=20):
+    """
+    Тут все стандартно! Единственное реализовал развесовку классов
+    :param model:
+    :param train_loader:
+    :param val_loader:
+    :param target:
+    :param epochs:
+    :return:
+    """
     unique = np.unique(target)
     l = target.tolist()
     weight = class_weight.compute_class_weight(class_weight='balanced', classes=unique, y=l)

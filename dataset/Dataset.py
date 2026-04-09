@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 init = False
 
+
 def __init__():
     global init
     init = mt5.initialize('C:/demoalfaforex/terminal64.exe')
@@ -14,6 +15,7 @@ def __init__():
         print('Initialization complete')
     else:
         print('Initialization failed')
+
 
 def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
     """
@@ -44,13 +46,12 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(df[features])
 
-
     X, y = [], []
     for i in range(len(scaled_data) - window_len - predict_len):
-        X.append(scaled_data[i:i+window_len])
-        past_close = df['close'].iloc[i+window_len - 1]
+        X.append(scaled_data[i:i + window_len])
+        past_close = df['close'].iloc[i + window_len - 1]
         tmp = -1
-        data_index = df.index[i+window_len - 1]
+        data_index = df.index[i + window_len - 1]
         for _y in range(i + window_len, i + window_len + predict_len):
             low_diff = (past_close - df['close'].iloc[_y]) / point
             high_diff = (df['close'].iloc[_y] - past_close) / point
@@ -65,19 +66,19 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
 
     X = np.array(X)
     y = np.array(y)
-
-
-    # indexes = np.where(y == -1)[0].tolist()
-
-    # X_TWO = np.delete(X, indexes, axis=0)
-    # y_TWO = np.delete(y, indexes)
-
+    """
+    это предназначено для модели, которая ищет тренд. Получается датасет состоит из BUY/SELL/WAIT
+     BUY/SELL сделал как 1, а WAIT - 0
+     """
     mask = y == 0
-    y[mask] = 1
+    y[mask] = 1  # Все нули меняю на 1
 
     mask2 = y == -1
-    y[mask2] = 0
-    #
+    y[mask2] = 0  # Все -1 меняю на 0
+
+    """
+    В данных строках ниже реализовал балансировку классов, которая так же не помогла.
+    
     nonzero = np.count_nonzero(y == 0)
     count_nonzero = np.count_nonzero(y > 0)
     print(f'nonzero: {nonzero}, count_nonzero: {count_nonzero}')
@@ -93,13 +94,11 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
         nonzero = np.count_nonzero(y == 0)
         count_nonzero = np.count_nonzero(y > 0)
         print(f'nonzero: {nonzero}, count_nonzero: {count_nonzero}')
-
+    """
     split = int(0.8 * len(X))
-    # split_TWO = int(0.8 * len(X_TWO))
 
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
-
 
     # Преобразование в тензоры PyTorch
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(1)
@@ -108,19 +107,8 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32).unsqueeze(1)
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-    # X_train_TWO, X_test_TWO = X_TWO[:split_TWO], X_TWO[split_TWO:]
-    # y_train_TWO, y_test_TWO = y_TWO[:split_TWO], y_TWO[split_TWO:]
-    #
-    #
-    # # Преобразование в тензоры PyTorch
-    # X_train_tensor_TWO = torch.tensor(X_train_TWO, dtype=torch.float32).unsqueeze(1)
-    # y_train_tensor_TWO = torch.tensor(y_train_TWO, dtype=torch.long)
-    #
-    # X_test_tensor_TWO = torch.tensor(X_test_TWO, dtype=torch.float32).unsqueeze(1)
-    # y_test_tensor_TWO = torch.tensor(y_test_TWO, dtype=torch.long)
-
-    # return (X_train_tensor, y_train_tensor), (X_test_tensor, y_test_tensor), (X_train_tensor_TWO, y_train_tensor_TWO), (X_test_tensor_TWO, y_test_tensor_TWO), scaler
     return (X_train_tensor, y_train_tensor), (X_test_tensor, y_test_tensor), scaler
+
 
 if __name__ == '__main__':
     create_dataset(symbol='EURUSDrfd', window_len=30, predict_len=10)
