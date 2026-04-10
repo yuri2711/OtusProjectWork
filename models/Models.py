@@ -1,3 +1,5 @@
+import csv
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -5,6 +7,8 @@ from matplotlib import pyplot as plt
 from torch import optim, Tensor
 import numpy as np
 from sklearn.utils import class_weight
+
+METRICS_FILE = 'training_metrics.csv'
 
 
 class TradingCNN(nn.Module):
@@ -26,34 +30,42 @@ class TradingCNN(nn.Module):
         """
         super(TradingCNN, self).__init__()
 
-        # Сверточные слои
+        # Сверточные слои + BatchNorm для стабилизации обучения
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, n_features), padding=(1, 0))
+        self.bn1 = nn.BatchNorm2d(64)
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3, 1), padding=(1, 0))
+        self.bn2 = nn.BatchNorm2d(128)
         self.conv3 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=(3, 1), padding=(1, 0))
+        self.bn3 = nn.BatchNorm2d(256)
 
-        # Полносвязные слои (для более сложного анализа)
-        self.fc1 = nn.Linear(768, 700)  # тут не понял как правильно считать количество нейронов. Сейчас стоит 768, но это я вставляю после ошибки запуска.
-        self.fc2 = nn.Linear(700, 64)
+        # Полносвязные слои
+        # 256 каналов * 3 (временных шага после 3x MaxPool) * 1 (ширина) = 768
+        self.fc1 = nn.Linear(768, 256)
+        self.dropout1 = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(256, 64)
+        self.dropout2 = nn.Dropout(0.3)
 
         # Выходной слой
         self.output = nn.Linear(64, n_classes)  # Классификация
 
     def forward(self, x):
         # x: [batch_size, 1, window_len, n_features]
-        x = F.relu(self.conv1(x))
+        x = F.relu(self.bn1(self.conv1(x)))
         x = F.max_pool2d(x, kernel_size=(2, 1))
 
-        x = F.relu(self.conv2(x))
+        x = F.relu(self.bn2(self.conv2(x)))
         x = F.max_pool2d(x, kernel_size=(2, 1))
 
-        x = F.relu(self.conv3(x))
+        x = F.relu(self.bn3(self.conv3(x)))
         x = F.max_pool2d(x, kernel_size=(2, 1))
 
         # Преобразуем для полносвязных слоёв
         x = x.view(x.size(0), -1)
 
         x = F.relu(self.fc1(x))
+        x = self.dropout1(x)
         x = F.relu(self.fc2(x))
+        x = self.dropout2(x)
 
         out = self.output(x)
         return out
@@ -74,8 +86,13 @@ def train_model(model, train_loader, val_loader, target: Tensor, epochs=20):
 
     criterion = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float32))
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
     train_losses, val_accuracies = [], []
+
+    with open(METRICS_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['epoch', 'train_loss', 'val_accuracy', 'lr'])
 
     for epoch in range(epochs):
         model.train()
@@ -91,6 +108,7 @@ def train_model(model, train_loader, val_loader, target: Tensor, epochs=20):
 
         avg_loss = epoch_loss / len(train_loader)
         train_losses.append(avg_loss)
+        scheduler.step(avg_loss)
 
         # Валидация
         model.eval()
@@ -104,12 +122,29 @@ def train_model(model, train_loader, val_loader, target: Tensor, epochs=20):
 
         accuracy = correct / total
         val_accuracies.append(accuracy)
+        current_lr = optimizer.param_groups[0]['lr']
 
-        print(f'Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.4f} | Val Acc: {accuracy:.4f}')
+        print(f'Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.4f} | Val Acc: {accuracy:.4f} | LR: {current_lr:.6f}')
 
-    plt.figure(figsize=(8, 4))
-    plt.plot(train_losses, label='Train Loss')
-    plt.plot(val_accuracies, label='Val Accuracy')
-    plt.legend()
-    plt.title('Обучение модели')
-    plt.show()
+        with open(METRICS_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([epoch + 1, f'{avg_loss:.6f}', f'{accuracy:.6f}', f'{current_lr:.6f}'])
+
+    # Сохранение графика
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Train Loss', color='tab:red')
+    ax1.plot(range(1, epochs + 1), train_losses, color='tab:red', label='Train Loss')
+    ax1.tick_params(axis='y', labelcolor='tab:red')
+
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Val Accuracy', color='tab:blue')
+    ax2.plot(range(1, epochs + 1), val_accuracies, color='tab:blue', label='Val Accuracy')
+    ax2.tick_params(axis='y', labelcolor='tab:blue')
+
+    fig.suptitle('Training Progress')
+    fig.legend(loc='upper center', bbox_to_anchor=(0.5, 0.92), ncol=2)
+    fig.tight_layout()
+    fig.savefig('training_curve.png', dpi=150)
+    print(f'Graph saved to training_curve.png')
+    print(f'Metrics saved to {METRICS_FILE}')

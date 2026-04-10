@@ -1,3 +1,8 @@
 /.venv/
 *workspace.xml*
 /.idea/workspace.xml
+models/__pycache__/Models.cpython-312.pyc
+uv.lock
+.gitignore
+CLAUDE.md
+errors.md
