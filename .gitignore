@@ -6,3 +6,10 @@ uv.lock
 .gitignore
 CLAUDE.md
 errors.md
+training_metrics_abc.csv
+.gitignore
+training_curve_abc.png
+.gitignore
+training_metrics_ab.csv
+training_comparison.png
+plot_comparison.py
