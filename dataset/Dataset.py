@@ -1,3 +1,7 @@
+import os
+import sys
+from datetime import datetime
+
 import torch
 import pandas as pd
 import numpy as np
@@ -6,15 +10,16 @@ from sklearn.preprocessing import StandardScaler
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 init = False
+DATA_FILE = 'trading_data.h5'
 
 
-def __init__():
+def initialize_mt5():
     global init
     init = mt5.initialize('C:/demoalfaforex/terminal64.exe')
     if init:
-        print('Initialization complete')
+        print(f'[{datetime.now()}] Initialization complete')
     else:
-        print('Initialization failed')
+        print(f'[{datetime.now()}] Initialization failed')
 
 
 def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
@@ -32,15 +37,34 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
     :param symbol:
     :return:
     """
-    global init
-    if not init:
-        __init__()
+    if os.path.exists(DATA_FILE):
+        try:
+            df = pd.read_hdf(DATA_FILE, key='data')
+            print(f'[{datetime.now()}] Data loaded from file: {DATA_FILE}')
+
+        except Exception as e:
+            print(f"[{datetime.now()}] Error reading file {DATA_FILE}: {e}. Trying to fetch from MT5.")
+            initialize_mt5()
+            if not init:
+                print('Ошибка подключения к терминалу и отсутствует или поврежден файл с данными')
+                sys.exit(1)
+            df = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 99000))
+
+
+    else:
+        initialize_mt5()
+        if not init:
+            print('Ошибка подключения к терминалу')
+            sys.exit(1)
+        df = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 99000))
+        print(f"[{datetime.now()}] Fetching data from MT5...")
+        df.to_hdf(DATA_FILE, key='data', mode='w')
     point = 0.00001
 
-    df = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 99000))
     df.drop(columns=['tick_volume', 'real_volume'], inplace=True)
     df['time'] = pd.to_datetime(df['time'], unit='s', utc=True)
     df.set_index('time', inplace=True)
+    print(f"[{datetime.now()}] Data saved to {DATA_FILE}")
     print(df)
     features = ['open', 'high', 'low', 'close']
     scaler = StandardScaler()
@@ -106,8 +130,8 @@ def create_dataset(symbol: str, window_len: int = 30, predict_len: int = 10):
 
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32).unsqueeze(1)
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
-
     return (X_train_tensor, y_train_tensor), (X_test_tensor, y_test_tensor), scaler
+
 
 
 if __name__ == '__main__':
